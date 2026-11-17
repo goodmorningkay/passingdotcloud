@@ -1,0 +1,2 @@
+#!/bin/sh
+exec sudo -n /usr/local/libexec/passing-cloud-deploy ssh "$SSH_ORIGINAL_COMMAND"

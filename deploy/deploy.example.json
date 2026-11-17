@@ -1,0 +1,13 @@
+{
+  "root": "/srv/passing-cloud",
+  "project": "passing-cloud",
+  "compose_file": "compose.yaml",
+  "overrides": [],
+  "env_file": "/etc/passing-cloud/production.env",
+  "origin": "https://files.example.com",
+  "data_mount": {
+    "type": "volume",
+    "source": "passing-cloud_transfers"
+  },
+  "build_free_bytes": 4000000000
+}

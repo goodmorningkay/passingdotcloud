@@ -1,0 +1,66 @@
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    var(--sky-top) 0%,
+    var(--sky-middle) 45%,
+    var(--sky-low) 76%,
+    var(--sky-bottom) 100%
+  );
+}
+.definitions {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.sun,
+.moon {
+  --body-size: clamp(38px, 4.2vw, 68px);
+  position: absolute;
+  top: var(--body-y, 17%);
+  left: var(--body-x, 76%);
+  width: var(--body-size);
+  height: var(--body-size);
+  transform: translate(-50%, -50%);
+}
+.sun {
+  border-radius: 50%;
+  background: var(--sun-color);
+  opacity: var(--sun-opacity);
+}
+.moon {
+  color: #f4f0dc;
+  opacity: var(--moon-opacity);
+}
+.clouds,
+.stars {
+  position: absolute;
+  inset: 0;
+}
+.stars {
+  opacity: var(--stars-opacity);
+  mask-image: linear-gradient(to bottom, #000 65%, transparent 100%);
+}
+.star {
+  position: absolute;
+  width: var(--star-size);
+  height: var(--star-size);
+  border-radius: 50%;
+  background: #f6f2dd;
+}
+.cloud {
+  position: absolute;
+  left: 0;
+  color: var(--cloud-color);
+  will-change: transform;
+}
+.cloud svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}

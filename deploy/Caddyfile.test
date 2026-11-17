@@ -1,0 +1,40 @@
+# Import this file from the host Caddyfile, outside its global block.
+files.example.com {
+    tls {
+        protocols tls1.2 tls1.3
+    }
+    header {
+        -Server
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy no-referrer
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    }
+    @blocked path /.git* /.env* /ops* /.*
+    respond @blocked 404
+    request_body {
+        max_size 100065536
+    }
+    timeouts {
+        read_timeout 30s
+        write_timeout 30s
+    }
+    reverse_proxy unix//run/passing-cloud-test/proxy.sock {
+        header_up Host files.example.com
+        header_up X-Forwarded-Host files.example.com
+        header_up X-Forwarded-Proto https
+        header_up X-Forwarded-For {client_ip}
+        header_up -X-Real-IP
+        header_up -Forwarded
+        transport http {
+            dial_timeout 5s
+            response_header_timeout 310s
+            read_timeout 310s
+            write_timeout 310s
+        }
+    }
+    log passing_cloud_test {
+        output discard
+    }
+}

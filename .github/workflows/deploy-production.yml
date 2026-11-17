@@ -1,0 +1,68 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Full commit ID from main with passing CI
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: passing-cloud-production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      RELEASE_SHA: ${{ inputs.release }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+      - run: node --import tsx scripts/deploy-production.ts gate
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment:
+      name: production
+      deployment: false
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      RELEASE_SHA: ${{ inputs.release }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+      - name: Deploy and check the selected commit
+        run: node --import tsx scripts/deploy-production.ts deploy
+        env:
+          PASSING_PRODUCTION_ORIGIN: ${{ vars.PASSING_PRODUCTION_ORIGIN }}
+          PASSING_DEPLOY_HOST: ${{ secrets.PASSING_DEPLOY_HOST }}
+          PASSING_DEPLOY_USER: ${{ secrets.PASSING_DEPLOY_USER }}
+          PASSING_DEPLOY_KEY: ${{ secrets.PASSING_DEPLOY_KEY }}
+          PASSING_DEPLOY_KNOWN_HOSTS: ${{ secrets.PASSING_DEPLOY_KNOWN_HOSTS }}
+          PASSING_DEPLOY_PORT: ${{ vars.PASSING_DEPLOY_PORT }}

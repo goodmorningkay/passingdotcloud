@@ -1,0 +1,15 @@
+node_modules
+.next
+.npm-cache
+.dsh
+data
+output
+coverage
+test-results
+playwright-report
+package-lock.json
+next-env.d.ts
+deploy/certs
+deploy-state
+.test-data
+ops/private

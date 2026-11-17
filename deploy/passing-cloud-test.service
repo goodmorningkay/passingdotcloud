@@ -1,0 +1,20 @@
+[Unit]
+Description=Run passing.cloud behind Caddy
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/passing-cloud-test/current
+ExecStartPre=/usr/bin/install -d -o root -g caddy -m 0750 /run/passing-cloud-test
+ExecStart=/usr/bin/docker compose -f compose.caddy.yaml up -d --no-build --wait --wait-timeout 120
+ExecStop=/usr/bin/docker compose -f compose.caddy.yaml stop
+TimeoutStartSec=180
+TimeoutStopSec=120
+UMask=0027
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

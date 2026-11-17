@@ -1,0 +1,11 @@
+[Unit]
+Description=Check passing.cloud transfers every five minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+Unit=passing-cloud-monitor.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,47 @@
+name: Check passing.cloud
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm audit --omit=dev --audit-level=moderate
+      - run: npm run check
+      - run: python3 -B -m unittest discover -s scripts -p 'test_*.py'
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:e2e
+
+  containers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check Compose configurations
+        run: |
+          PASSING_NGINX_CONFIG=./deploy/nginx.conf docker compose config --quiet
+          PASSING_NGINX_CONFIG=./deploy/nginx.caddy.conf docker compose -f compose.caddy.yaml config --quiet
+        env:
+          PASSING_PUBLIC_ORIGIN: https://files.example.com
+      - name: Check container deployment and recovery
+        id: rehearsal
+        run: python3 -B scripts/rehearse-deployment.py
+        env:
+          TMPDIR: ${{ runner.temp }}
+          PASSING_KEEP_REHEARSAL: "1"
+      - name: Upload failed container log
+        if: ${{ failure() && steps.rehearsal.outcome == 'failure' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: container-rehearsal-docker-log
+          path: ${{ runner.temp }}/passing-deployment-rehearsal-*/docker.log
+          retention-days: 7

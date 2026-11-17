@@ -1,0 +1,17 @@
+node_modules
+**/__pycache__
+.next
+.git
+.env*
+.npm-cache
+.dsh
+data
+output
+coverage
+test-results
+playwright-report
+*.tsbuildinfo
+deploy/certs
+deploy-state
+.test-data
+ops/private

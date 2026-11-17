@@ -1,0 +1,20 @@
+[Unit]
+Description=Check a complete passing.cloud transfer
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+DynamicUser=true
+WorkingDirectory=/opt/passing-cloud-monitor
+EnvironmentFile=/etc/passing-cloud-monitor.env
+ExecStart=/usr/bin/node --import tsx scripts/monitor-transfer.ts
+TimeoutStartSec=150
+MemoryMax=192M
+TasksMax=64
+LimitCORE=0
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
